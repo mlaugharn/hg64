@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14...3.22)
 project(hg64 LANGUAGES CXX C)
-
+# set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
+# "${PROJECT_SOURCE_DIR}/scikit-build/skbuild/resources/cmake")
 find_package(PythonExtensions REQUIRED)
 
 # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR

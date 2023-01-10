@@ -511,9 +511,24 @@ hg64_validate(void) {
     }
 }
 /**********************************************************************/
-
-
 namespace py = pybind11;
+
+void hg64_batch_add(hg64 *hg, pybind11::list values, pybind11::list increments) {
+  for (int i = 0; i < len(values); i++) {
+    hg64_add(hg, values[i].cast<uint64_t>(), increments[i].cast<uint64_t>());
+  }
+}
+
+// sample values
+pybind11::list hg64s_sample_values(hg64s *hgs, pybind11::list ranks) {
+    // ranks must be a list of uint64_t within [0, hg->population)
+    pybind11::list values;
+    for (int i = 0; i < ranks.size(); i++) {
+        values.append(py::cast(hg64s_value_at_rank(hgs, ranks[i].cast<uint64_t>())));
+    }
+    return values;
+}
+
 
 PYBIND11_MODULE(_hg64, m) {
     m.doc() = "64-bit histograms";
@@ -524,6 +539,7 @@ PYBIND11_MODULE(_hg64, m) {
             .def("size", &hg64_size)
             .def("inc", &hg64_inc, py::arg("value"))
             .def("add", &hg64_add, py::arg("value"), py::arg("inc"))
+            .def("batch_add", &hg64_batch_add, py::arg("values"), py::arg("increments"))
             .def("get", [](hg64 &hg, unsigned key) -> py::tuple {
                 uint64_t min, max, count;
                 bool ret = hg64_get(&hg, key, &min, &max, &count);
@@ -535,7 +551,7 @@ PYBIND11_MODULE(_hg64, m) {
                 hg64_mean_variance(&hg, &mean, &variance);
                 return py::make_tuple(mean, variance);
             })
-            .def("snapshot", &hg64_snapshot, py::return_value_policy::reference)
+            .def("snapshot", &hg64_snapshot, py::return_value_policy::take_ownership)
             .def("__del__", &hg64_destroy);
 
     py::class_<hg64s>(m, "Snapshot")
@@ -552,5 +568,6 @@ PYBIND11_MODULE(_hg64, m) {
             })
             .def_readonly("counters", &hg64s::counters)
             .def("value_at_rank", &hg64s_value_at_rank, py::arg("rank"))
-            .def("value_at_quantile", &hg64s_value_at_quantile, py::arg("quantile"));
+            .def("value_at_quantile", &hg64s_value_at_quantile, py::arg("quantile"))
+            .def("sample_values", &hg64s_sample_values, py::arg("ranks"), pybind11::return_value_policy::take_ownership);
 }

@@ -11,19 +11,17 @@
 #llvm    = /opt/homebrew/opt/llvm
 #CC    = $(llvm)/bin/clang
 #LDFLAGS = -L$(llvm)/lib -Wl,-rpath,$(llvm)/lib
-CFLAGS    = -g -O2 -Wall -Wextra #-fsanitize=undefined,address
+CFLAGS    = -g -O2# -Wall -Wextra #-fsanitize=undefined,address
 
 LIBS = -lm -lpthread
 OBJS = test.o hg64.o random.o
 
 all: test
 
-clean:
-    rm -f $(OBJS) test
+clean:    rm -f $(OBJS) test
 
-test: $(OBJS)
-    $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+test: $(OBJS) $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 test.o: test.c hg64.h random.h
-hg64.o: hg64.c hg64.h
-random.o: random.c random.h
+hg64.o: hg64.cpp hg64.h
+random.o: random.cpp random.h
